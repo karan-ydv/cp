@@ -10,33 +10,25 @@ int32_t main()
 	while(t--)
 	{
 		int n;	cin >> n;
-		int a[n];	for(int& x: a)	cin >> x;
-		sort(a, a + n);
-		map<int, int> mp;
-		for(int i = 0 ; i < n; i++) {
-			int x;	cin >> x;
-			mp[x]++;
-		}
-		multiset<int> s;
-		for(auto [x, f]: mp) {
-			s.insert(f);
-		}
-		while(s.size() > 1)
+		map<int, int> map;
+		for(int i = 0; i < n; i++)
 		{
-			auto i1 = s.begin();
-			auto i2 = --s.end();
-			int a = *i1, b = *i2;
-			s.erase(i1);
-			s.erase(i2);
-			if(b - a)
-			{
-				s.insert(b - a);
-			}
+			int x;	cin >> x;
+			map[x]++;
 		}
-		int ans = 0;
-		if(s.size()) {
-			ans = *s.begin();
+		priority_queue<int> pq;
+		for(auto [x, f]: map)
+			pq.push(f);
+		
+		while(pq.size() > 1)
+		{
+			int a = pq.top(); pq.pop();
+			int b = pq.top(); pq.pop();
+			a--, b--;
+			if(a) pq.push(a);
+			if(b) pq.push(b);
 		}
+		int ans = pq.empty() ? 0 : pq.top();
 		cout << ans << '\n';
 	}
 }
