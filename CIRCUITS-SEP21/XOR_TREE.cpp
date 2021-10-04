@@ -1,81 +1,92 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-struct Segtree {
-    typedef pair<int, int> item;
-    int n;  vector<item> t;
-    inline item op(item a, item b) { return min(a, b); }
-    Segtree() = default;
-    Segtree(vector<item>& v) {
-        n = v.size();
-        t.resize(n << 1);
-        copy(v.begin(), v.end(), t.begin() + n);
-        for(int i = n - 1; i > 0; i--)
-            t[i] = op(t[i << 1], t[i << 1|1]);
-    }
-    item range_op(int l, int r) {  // op on interval [l, r)
-        item res = {1 << 30, 0};    // neutral value
-        for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
-            if(l & 1) res = op(res, t[l++]);
-            if(r & 1) res = op(res, t[--r]);
-        }
-        return res;
-    }
-};
-
-struct Graph 
+class LCA
 {
-    typedef int item;
-    vector<vector<item>> adj;
-    vector<pair<int, int>> euler;
-    vector<int> first, value, zor;
-    int V, E;   Segtree st;
-    Graph(int v, int e) : V(v), E(e)
+    typedef pair<int, int> item;
+    int n;
+    vector<item> t;
+    vector<int> first;
+    inline item op(item a, item b) { return min(a, b); }
+
+public:
+    LCA(int v, vector<vector<int>> &adj)
     {
-        adj.resize(v + 1);
-        zor.resize(v + 1);
-        first.resize(v + 1);
-        value.resize(v + 1);
-        euler.reserve(2 * v - 1);
-        for(int i = 0; i < e; i++)
+        n = 2 * v - 1;
+        t.resize(n << 1);
+        first.resize(n + 1);
+        int c = 0;
+        function<void(int, int, int)>
+            euler_tour = [&](int u, int p, int h)
         {
-            int u, v;	cin >> u >> v;
-            adj[u].emplace_back(v);
-            adj[v].emplace_back(u);
-        }
-        dfs(1, 0, 0);
-        st = Segtree(euler);
-    }
-    void dfs(int u, int p, int d)
-    {
-        first[u] = euler.size();
-        euler.emplace_back(d, u);
-        for(int v: adj[u]) if(v != p)
-        {
-            dfs(v, u, d + 1);
-            euler.emplace_back(d, u);
-        }
+            t[n + c] = {h, u};
+            first[u] = c++;
+            for (int v : adj[u])
+                if (v != p)
+                {
+                    euler_tour(v, u, h + 1);
+                    t[n + c++] = {h, u};
+                }
+        };
+        euler_tour(1, 0, 0);
+        for (int i = n - 1; i > 0; i--)
+            t[i] = op(t[i << 1], t[i << 1 | 1]);
     }
     int lca(int u, int v)
     {
-        if(first[u] > first[v]) swap(u, v);
-        return st.range_op(first[u], first[v] + 1).second;
+        int l = first[u], r = first[v];
+        if (l > r)
+            swap(l, r);
+        r++;
+        item res = {1 << 30, 0};
+        for (l += n, r += n; l < r; l >>= 1, r >>= 1)
+        {
+            if (l & 1)
+                res = op(res, t[l++]);
+            if (r & 1)
+                res = op(res, t[--r]);
+        }
+        return res.second;
+    }
+};
+
+struct Graph
+{
+    typedef int item;
+    vector<vector<item>> adj;
+    vector<int> value, zor;
+    int V, E;
+    Graph(int v, int e) : V(v), E(e)
+    {
+        adj.resize(v + 1);
+        for (int i = 0; i < e; i++)
+        {
+            int u, v;
+            cin >> u >> v;
+            adj[u].emplace_back(v);
+            adj[v].emplace_back(u);
+        }
     }
     void DFS(int u, int p)
     {
-        for(int v: adj[u]) if(v != p) {
-            zor[u] ^= zor[v];
-            DFS(v, u);
-        }
+        for (int v : adj[u])
+            if (v != p)
+            {
+                DFS(v, u);
+                zor[u] ^= zor[v];
+            }
         value[u] ^= zor[u];
     }
     void solve(int q)
     {
-        while(q--)
+        LCA L(V, adj);
+        zor.resize(V + 1);
+        value.resize(V + 1);
+        while (q--)
         {
             int u, v, w;
             cin >> u >> v >> w;
-            int a = lca(u, v);
+            int a = L.lca(u, v);
             zor[u] ^= w;
             zor[v] ^= w;
             value[a] ^= w;
@@ -89,8 +100,9 @@ int32_t main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    int t;	cin >> t;
-    while(t--)
+    int t;
+    cin >> t;
+    while (t--)
     {
         int n, q;
         cin >> n >> q;
