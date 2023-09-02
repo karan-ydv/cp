@@ -1,8 +1,4 @@
-# ingore all files
-*.*
-
-# don't ignore these files
-!*.cpp
-!*.py
-!*.c
-!*.prob
+*.bin
+*.out
+.DS_STORE
+.ruby-version
