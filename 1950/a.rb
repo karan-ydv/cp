@@ -1,11 +1,11 @@
-def minimum_subarray_length(nums, k)
-  n = nums.size
-  (1..n).each do |i|
-    0.upto(n - i).each do |j|
-      orz = 0
-      i.times { |l| orz |= nums[j + l] }
-      return i if orz >= k
-    end
+t = ARGF.readline.to_i
+t.times do
+  a, b, c = ARGF.readline.split.map(&:to_i)
+  if a < b and b < c
+    puts "STAIR"
+  elsif a < b && c < b
+    puts "PEAK"
+  else
+    puts "NONE"
   end
-  return -1
 end
