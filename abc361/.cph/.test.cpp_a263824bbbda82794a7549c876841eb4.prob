@@ -1,0 +1,1 @@
+{"name":"Local: test","url":"/Users/karan.y/pgit/cp/abc361/test.cpp","tests":[{"id":1720267070482,"input":"5\n1\n2\n3\n4\n5","output":"1\n2\n3\n4\n5"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"/Users/karan.y/pgit/cp/abc361/test.cpp","group":"local","local":true}
